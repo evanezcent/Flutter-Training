@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:training/routes/mahasiswa_routes.dart';
-import './profil.dart';
+import './views/profil.dart';
+import './views/add_data.dart';
 
 void main() => runApp(new MaterialApp(
       title: "Aplikasiku !",
@@ -24,9 +25,14 @@ class _HomeState extends State<Home> {
       appBar: new AppBar(
         title: new Text("Aplikasiku !"),
       ),
+      // Untuk add data baru
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: (){},
+        onPressed: ()=> Navigator.of(context).push(
+          new MaterialPageRoute(
+            builder: (BuildContext context)=>new AddData(),
+          )
+        ),
       ),
       body: new FutureBuilder<List>(
         future: mhs.getData(),
