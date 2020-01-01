@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:training/views/edit_data.dart';
 
 class Profil extends StatefulWidget {
   // Variable penampung data API
@@ -56,7 +57,11 @@ class _ProfilState extends State<Profil> {
                     RaisedButton(
                       child: Text("Edit"),
                       color: Colors.lightBlue,
-                      onPressed: (){},
+                      onPressed: ()=>Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => new EditData(list: widget.list,idx: widget.idx,),
+                        )
+                      )
                     ),
                     SizedBox(
                       width: 10,

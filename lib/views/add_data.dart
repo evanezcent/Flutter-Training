@@ -35,7 +35,6 @@ class _AddDataState extends State<AddData> {
         title: Text("Tambah Data Mahasiswa"),
       ),
       body: ListView(
-        shrinkWrap: true,
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(10.0),
