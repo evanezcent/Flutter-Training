@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AddData extends StatefulWidget {
   @override
@@ -6,13 +7,26 @@ class AddData extends StatefulWidget {
 }
 
 class _AddDataState extends State<AddData> {
-
   TextEditingController tx_name = new TextEditingController();
   TextEditingController tx_nim = new TextEditingController();
   TextEditingController tx_jurusan = new TextEditingController();
   TextEditingController tx_angkatan = new TextEditingController();
   TextEditingController tx_password = new TextEditingController();
   TextEditingController tx_cpass = new TextEditingController();
+
+  // FUNCTION
+  void addData() {
+    var url = 'http://10.0.2.2:7000/myapi/addData';
+
+    http.post(url, body: {
+      "tx_nim": tx_nim.text,
+      "tx_name": tx_name.text,
+      "tx_jurusan": tx_jurusan.text,
+      "tx_angkatan": tx_angkatan.text,
+      "tx_password": tx_password.text,
+      "tx_cpass": tx_cpass.text
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +97,10 @@ class _AddDataState extends State<AddData> {
                     style: TextStyle(color: Colors.white),
                   ),
                   color: Colors.blueAccent,
-                  onPressed: () {},
+                  onPressed: () {
+                    addData();
+                    Navigator.pop(context);
+                  },
                 )
               ],
             ),
