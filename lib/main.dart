@@ -43,6 +43,7 @@ class _HomeState extends State<Home> {
                 )
               : new Center(
                   child: new CircularProgressIndicator(),
+                  // child: Text("Kosong"),
                 );
         },
       ),
