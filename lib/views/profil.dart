@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:training/main.dart';
 import 'package:training/views/edit_data.dart';
 import 'package:http/http.dart' as http;
-// import 'package:permission_handler/permission_handler.dart';
-
+import 'package:async/async.dart';
 
 class Profil extends StatefulWidget {
   // Variable penampung data API
@@ -20,16 +19,38 @@ class Profil extends StatefulWidget {
 }
 
 class _ProfilState extends State<Profil> {
-
   // Get image handler
   File _image;
-  
-  Future getImageGallery() async{
+
+  Future getImageGallery() async {
     var imgFile = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       _image = imgFile;
     });
+  }
+
+  Future uploadHandle(File image) async {
+    var stream = new http.ByteStream(DelegatingStream.typed(image.openRead()));
+    var length = await image.length();
+    var uri = Uri.parse(
+        "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}");
+
+    var req = new http.MultipartRequest("PUT", uri);
+
+    var imgFile =
+        new http.MultipartFile("photo", stream, length, filename: "img.png");
+
+    req.files.add(imgFile);
+    print(req.files);
+    var res = await req.send();
+    print(res.statusCode);
+
+    if (res.statusCode == 200) {
+      print("Upload success");
+    } else {
+      print("Upload failed");
+    }
   }
 
   void deleteData() {
@@ -82,82 +103,91 @@ class _ProfilState extends State<Profil> {
     return new Scaffold(
         appBar:
             new AppBar(title: new Text("${widget.list[widget.idx]['nim']}")),
-        body: Container(
-          height: 500,
-          padding: EdgeInsets.all(10),
-          child: Card(
-            child: Center(
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    width: 150,
-                    child: CachedNetworkImage(
-                      imageUrl:
-                          "http://10.0.2.2:7000/uploads/${widget.list[widget.idx]['foto_profil']}",
+        body: SingleChildScrollView(
+          child: Container(
+            height: 600,
+            padding: EdgeInsets.all(10),
+            child: Card(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 20,
                     ),
-                  ),
-                  Container(
-                    // margin: EdgeInsets.only(bottom: 5, top: 10),
-                    child: FlatButton(
-                      child: Text(
-                        "Change profile picture",
-                        style: TextStyle(color: Colors.blueAccent),
+                    Container(
+                      width: 150,
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            "http://10.0.2.2:7000/uploads/${widget.list[widget.idx]['foto_profil']}",
                       ),
-                      onPressed: () => getImageGallery()
                     ),
-                  ),
-                  Container(
-                    child: _image == null?Text("Image Kosong"):Text("Image Success"),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    widget.list[widget.idx]['nim'],
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(widget.list[widget.idx]['nama']),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(widget.list[widget.idx]['jurusan']),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(widget.list[widget.idx]['angkatan'].toString()),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      RaisedButton(
-                          child: Text("Edit"),
-                          color: Colors.lightBlue,
-                          onPressed: () =>
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (BuildContext context) => new EditData(
-                                  list: widget.list,
-                                  idx: widget.idx,
-                                ),
-                              ))),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      RaisedButton(
-                        child: Text("Delete"),
-                        color: Colors.redAccent,
-                        onPressed: () => deleteHandle(),
-                      ),
-                    ],
-                  )
-                ],
+                    Container(
+                      // margin: EdgeInsets.only(bottom: 5, top: 10),
+                      child: FlatButton(
+                          child: Text(
+                            "Change profile picture",
+                            style: TextStyle(color: Colors.blueAccent),
+                          ),
+                          onPressed: () => getImageGallery()),
+                    ),
+                    Container(
+                      child: _image == null
+                          ? Text("")
+                          : RaisedButton(
+                              child: Text("Upload"),
+                              onPressed: () {
+                                uploadHandle(_image);
+                              },
+                            ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      widget.list[widget.idx]['nim'],
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(widget.list[widget.idx]['nama']),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(widget.list[widget.idx]['jurusan']),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(widget.list[widget.idx]['angkatan'].toString()),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        RaisedButton(
+                            child: Text("Edit"),
+                            color: Colors.lightBlue,
+                            onPressed: () =>
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      new EditData(
+                                    list: widget.list,
+                                    idx: widget.idx,
+                                  ),
+                                ))),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        RaisedButton(
+                          child: Text("Delete"),
+                          color: Colors.redAccent,
+                          onPressed: () => deleteHandle(),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
