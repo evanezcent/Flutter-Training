@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -31,20 +32,25 @@ class _ProfilState extends State<Profil> {
   }
 
   Future uploadHandle(File image) async {
+
+    // String base64Image = base64Encode(image.readAsBytesSync());
+    // var url = "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}";
+
+    // http.put(url, body: {
+    //   "photo": base64Image
+    // });
     var stream = new http.ByteStream(DelegatingStream.typed(image.openRead()));
     var length = await image.length();
+    print(length);
     var uri = Uri.parse(
         "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}");
 
     var req = new http.MultipartRequest("PUT", uri);
 
-    var imgFile =
-        new http.MultipartFile("photo", stream, length, filename: "img.png");
+    var imgFile = new http.MultipartFile("photo", stream, length);
 
     req.files.add(imgFile);
-    print(req.files);
     var res = await req.send();
-    print(res.statusCode);
 
     if (res.statusCode == 200) {
       print("Upload success");
@@ -116,10 +122,12 @@ class _ProfilState extends State<Profil> {
                     ),
                     Container(
                       width: 150,
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            "http://10.0.2.2:7000/uploads/${widget.list[widget.idx]['foto_profil']}",
-                      ),
+                      child: _image == null
+                          ? CachedNetworkImage(
+                              imageUrl:
+                                  "http://10.0.2.2:7000/uploads/${widget.list[widget.idx]['foto_profil']}",
+                            )
+                          : Image.file(_image),
                     ),
                     Container(
                       // margin: EdgeInsets.only(bottom: 5, top: 10),
