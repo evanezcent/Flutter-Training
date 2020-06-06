@@ -7,6 +7,10 @@ import 'package:training/main.dart';
 import 'package:training/views/edit_data.dart';
 import 'package:http/http.dart' as http;
 import 'package:async/async.dart';
+import 'dart:math' show Random;
+import 'package:random_string/random_string.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Profil extends StatefulWidget {
   // Variable penampung data API
@@ -25,14 +29,12 @@ class _ProfilState extends State<Profil> {
 
   Future getImageGallery() async {
     var imgFile = await ImagePicker.pickImage(source: ImageSource.gallery);
-
     setState(() {
       _image = imgFile;
     });
   }
 
   Future uploadHandle(File image) async {
-
     // String base64Image = base64Encode(image.readAsBytesSync());
     // var url = "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}";
 
@@ -41,14 +43,14 @@ class _ProfilState extends State<Profil> {
     // });
     var stream = new http.ByteStream(DelegatingStream.typed(image.openRead()));
     var length = await image.length();
-    print(length);
     var uri = Uri.parse(
         "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}");
 
-    var req = new http.MultipartRequest("PUT", uri);
+    final req = http.MultipartRequest("POST", uri);
 
-    var imgFile = new http.MultipartFile("photo", stream, length);
+    final imgFile = await http.MultipartFile.fromPath("photo", image.path);
 
+    print(stream);
     req.files.add(imgFile);
     var res = await req.send();
 
@@ -57,6 +59,10 @@ class _ProfilState extends State<Profil> {
     } else {
       print("Upload failed");
     }
+
+    res.stream.transform(utf8.decoder).listen((value) {
+      print(value);
+    });
   }
 
   void deleteData() {
@@ -66,7 +72,7 @@ class _ProfilState extends State<Profil> {
     http.delete(url);
   }
 
-  void deleteHandle() {
+  void deleteHandle(BuildContext context) {
     AlertDialog alert = new AlertDialog(
       content: Text.rich(
         new TextSpan(children: <TextSpan>[
@@ -190,7 +196,7 @@ class _ProfilState extends State<Profil> {
                         RaisedButton(
                           child: Text("Delete"),
                           color: Colors.redAccent,
-                          onPressed: () => deleteHandle(),
+                          onPressed: () => deleteHandle(context),
                         ),
                       ],
                     )

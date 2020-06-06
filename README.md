@@ -2,7 +2,8 @@
 
 **How to run ?**  
 
-> flutter run or F5
+    1. flutter pub get
+    2. flutter run or F5
 
 For the API documentation will be here soon :)
 
