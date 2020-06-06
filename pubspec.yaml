@@ -26,7 +26,8 @@ dependencies:
   http:
   cached_network_image: ^2.0.0-rc
   image_picker: 
-  random_string:
+  mime:
+  dio:
 
 dev_dependencies:
   flutter_test:

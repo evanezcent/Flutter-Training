@@ -8,9 +8,10 @@ import 'package:training/views/edit_data.dart';
 import 'package:http/http.dart' as http;
 import 'package:async/async.dart';
 import 'dart:math' show Random;
-import 'package:random_string/random_string.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
 
 class Profil extends StatefulWidget {
   // Variable penampung data API
@@ -28,7 +29,11 @@ class _ProfilState extends State<Profil> {
   File _image;
 
   Future getImageGallery() async {
-    var imgFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var imgFile = await ImagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50, // <- Reduce Image quality
+        maxHeight: 500, // <- reduce the image size
+        maxWidth: 500);
     setState(() {
       _image = imgFile;
     });
@@ -41,28 +46,50 @@ class _ProfilState extends State<Profil> {
     // http.put(url, body: {
     //   "photo": base64Image
     // });
-    var stream = new http.ByteStream(DelegatingStream.typed(image.openRead()));
-    var length = await image.length();
-    var uri = Uri.parse(
-        "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}");
+    // final mimeTypeData = lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
 
-    final req = http.MultipartRequest("POST", uri);
+    // var stream = new http.ByteStream(DelegatingStream.typed(image.openRead()));
+    // var length = await image.length();
+    // var uri = Uri.parse(
+    //     "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}");
 
-    final imgFile = await http.MultipartFile.fromPath("photo", image.path);
+    // final req = new http.MultipartRequest("PUT", uri);
 
-    print(stream);
-    req.files.add(imgFile);
-    var res = await req.send();
+    // final imgFile = await http.MultipartFile.fromPath('photo', image.path, contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
 
-    if (res.statusCode == 200) {
-      print("Upload success");
-    } else {
-      print("Upload failed");
-    }
+    // print(stream);
+    // req.files.add(imgFile);
+    // var res = await req.send();
 
-    res.stream.transform(utf8.decoder).listen((value) {
-      print(value);
+    // if (res.statusCode == 200) {
+    //   print("Upload success");
+    // } else {
+    //   print("Upload failed");
+    // }
+
+    // res.stream.transform(utf8.decoder).listen((value) {
+    //   print(value);
+    // });
+    String fileName = image.path.split('/').last;
+    Map<String, String> header = {"Content-Type": "multipart/form-data"};
+    FormData data = FormData.fromMap({
+      "photo": await MultipartFile.fromFile(
+        image.path,
+        filename: fileName,
+      ),
     });
+    Dio dio = new Dio();
+    dio.options.headers = {
+      'Content-type': 'multipart/form-data',
+      'Accept': 'application/json'
+    };
+
+    var response = await dio
+        .post(
+            "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}",
+            data: data,)
+        .then((value) => print(value))
+        .catchError((err) => print(err));
   }
 
   void deleteData() {
@@ -146,7 +173,7 @@ class _ProfilState extends State<Profil> {
                     ),
                     Container(
                       child: _image == null
-                          ? Text("")
+                          ? Text("ADA IMAGE")
                           : RaisedButton(
                               child: Text("Upload"),
                               onPressed: () {
