@@ -40,54 +40,25 @@ class _ProfilState extends State<Profil> {
   }
 
   Future uploadHandle(File image) async {
-    // String base64Image = base64Encode(image.readAsBytesSync());
-    // var url = "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}";
-
-    // http.put(url, body: {
-    //   "photo": base64Image
-    // });
-    // final mimeTypeData = lookupMimeType(image.path, headerBytes: [0xFF, 0xD8]).split('/');
-
-    // var stream = new http.ByteStream(DelegatingStream.typed(image.openRead()));
-    // var length = await image.length();
-    // var uri = Uri.parse(
-    //     "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}");
-
-    // final req = new http.MultipartRequest("PUT", uri);
-
-    // final imgFile = await http.MultipartFile.fromPath('photo', image.path, contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
-
-    // print(stream);
-    // req.files.add(imgFile);
-    // var res = await req.send();
-
-    // if (res.statusCode == 200) {
-    //   print("Upload success");
-    // } else {
-    //   print("Upload failed");
-    // }
-
-    // res.stream.transform(utf8.decoder).listen((value) {
-    //   print(value);
-    // });
+    
     String fileName = image.path.split('/').last;
     Map<String, String> header = {"Content-Type": "multipart/form-data"};
-    FormData data = FormData.fromMap({
-      "photo": await MultipartFile.fromFile(
-        image.path,
-        filename: fileName,
-      ),
+    FormData data = new FormData.fromMap({
+      "photo": await MultipartFile.fromFile(image.path,
+          filename: fileName, contentType: new MediaType('image', 'png')),
+      "type": "image/png"
     });
+    
     Dio dio = new Dio();
-    dio.options.headers = {
-      'Content-type': 'multipart/form-data',
-      'Accept': 'application/json'
-    };
 
-    var response = await dio
+    http.Response response = await dio
         .post(
             "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}",
-            data: data,)
+            data: data,
+            options: Options(headers: {
+              "accept": "*/*",
+              "Content-Type": "multipart/form-data"
+            }))
         .then((value) => print(value))
         .catchError((err) => print(err));
   }
