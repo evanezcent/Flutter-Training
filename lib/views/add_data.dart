@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:training/main.dart';
 
 class AddData extends StatefulWidget {
   @override
@@ -7,6 +8,7 @@ class AddData extends StatefulWidget {
 }
 
 class _AddDataState extends State<AddData> {
+  Dio dio = new Dio();
   TextEditingController tx_name = new TextEditingController();
   TextEditingController tx_nim = new TextEditingController();
   TextEditingController tx_jurusan = new TextEditingController();
@@ -15,17 +17,21 @@ class _AddDataState extends State<AddData> {
   TextEditingController tx_cpass = new TextEditingController();
 
   // FUNCTION
-  void addData() {
+  void addData() async {
     var url = 'http://10.0.2.2:7000/myapi/addData';
 
-    http.post(url, body: {
-      "tx_nim": tx_nim.text,
-      "tx_name": tx_name.text,
-      "tx_jurusan": tx_jurusan.text,
-      "tx_angkatan": tx_angkatan.text,
-      "tx_password": tx_password.text,
-      "tx_cpass": tx_cpass.text
-    });
+    try {
+      Response response = await dio.post(url, data: {
+        "tx_nim": tx_nim.text,
+        "tx_name": tx_name.text,
+        "tx_jurusan": tx_jurusan.text,
+        "tx_angkatan": tx_angkatan.text,
+        "tx_password": tx_password.text,
+        "tx_cpass": tx_cpass.text
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -98,7 +104,11 @@ class _AddDataState extends State<AddData> {
                   color: Colors.blueAccent,
                   onPressed: () {
                     addData();
-                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => new Home()
+                      )
+                    );
                   },
                 )
               ],

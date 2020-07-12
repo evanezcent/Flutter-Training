@@ -1,6 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:training/main.dart';
+
 
 class EditData extends StatefulWidget {
 
@@ -20,14 +21,19 @@ class _EditDataState extends State<EditData> {
   TextEditingController tx_angkatan;
   TextEditingController tx_nim;
 
-  void editData(){
+  void editData() async {
     var url = 'http://10.0.2.2:7000/myapi/editData/${widget.list[widget.idx]['nim']}';
-
-    http.put(url, body: {
+    Dio dio = new Dio();
+    try {
+      Response response = await dio.put(url, data: {
       "tx_name": tx_name.text,
       "tx_jurusan": tx_jurusan.text,
       "tx_angkatan": tx_angkatan.text,
     });
+    } catch (e) {
+      print(e);
+    }
+    
   }
 
   void initState(){

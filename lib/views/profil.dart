@@ -1,16 +1,10 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:training/main.dart';
 import 'package:training/views/edit_data.dart';
-import 'package:http/http.dart' as http;
-import 'package:async/async.dart';
-import 'dart:math' show Random;
 import 'package:http_parser/http_parser.dart';
-import 'package:mime/mime.dart';
-import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 
 class Profil extends StatefulWidget {
@@ -40,34 +34,44 @@ class _ProfilState extends State<Profil> {
   }
 
   Future uploadHandle(File image) async {
-    
+    // Get image path
     String fileName = image.path.split('/').last;
-    Map<String, String> header = {"Content-Type": "multipart/form-data"};
+   
+  //  Make a form data
     FormData data = new FormData.fromMap({
       "photo": await MultipartFile.fromFile(image.path,
           filename: fileName, contentType: new MediaType('image', 'png')),
       "type": "image/png"
     });
-    
+
     Dio dio = new Dio();
 
-    http.Response response = await dio
-        .post(
-            "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}",
-            data: data,
-            options: Options(headers: {
-              "accept": "*/*",
-              "Content-Type": "multipart/form-data"
-            }))
-        .then((value) => print(value))
-        .catchError((err) => print(err));
+    try {
+      var response = await dio
+          .post(
+              "http://10.0.2.2:7000/myapi/uploadFoto/${widget.list[widget.idx]['nim']}",
+              data: data,
+              options: Options(headers: {
+                "accept": "*/*",
+                "Content-Type": "multipart/form-data"
+              }))
+          .then((value) => print(value))
+          .catchError((err) => print(err));
+    } catch (e) {
+      print(e);
+    }
   }
 
-  void deleteData() {
+  void deleteData() async {
     var url =
         'http://10.0.2.2:7000/myapi/deleteData/${widget.list[widget.idx]['nim']}';
-
-    http.delete(url);
+    Dio dio = new Dio();
+    try {
+      Response res = await dio.delete(url);
+    } catch (e) {
+      print(e);
+    }
+    // http.delete(url);
   }
 
   void deleteHandle(BuildContext context) {
@@ -144,7 +148,7 @@ class _ProfilState extends State<Profil> {
                     ),
                     Container(
                       child: _image == null
-                          ? Text("ADA IMAGE")
+                          ? Text("No Image")
                           : RaisedButton(
                               child: Text("Upload"),
                               onPressed: () {

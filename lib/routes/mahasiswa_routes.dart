@@ -1,12 +1,15 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
+import 'package:dio/dio.dart';
 
 class Mahasiswa {
 
   Future<List> getData() async {
+    Dio dio = new Dio();
     // 10.0.2.2 = default localhost for android emulator
-    final response = await http.get('http://10.0.2.2:7000/myapi/getData');
-    return json.decode(response.body);
+    Response<List> response = await dio.get('http://10.0.2.2:7000/myapi/getData');
+    List responseBody = response.data;
+    // print(response.statusCode);
+    return responseBody;
   }
   
 }
